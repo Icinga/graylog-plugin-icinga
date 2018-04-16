@@ -1,10 +1,11 @@
 package com.icinga.icinga;
 
-import org.graylog.plugins.sample.alerts.SampleAlertCondition;
-import org.graylog.plugins.sample.alerts.SampleAlertNotification;
-import org.graylog.plugins.sample.decorator.SampleDecorator;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
+import org.graylog2.plugin.outputs.MessageOutput;
+import org.graylog2.plugin.outputs.MessageOutput.Factory;
+
+import com.google.inject.multibindings.MapBinder;
 
 import java.util.Collections;
 import java.util.Set;
@@ -44,14 +45,7 @@ public class IcingaModule extends PluginModule {
          * addConfigBeans();
          */
 
-        addAlarmCallback(SampleAlertNotification.class);
-
-        addAlertCondition(SampleAlertCondition.class.getCanonicalName(),
-                SampleAlertCondition.class,
-                SampleAlertCondition.Factory.class);
-
-        installSearchResponseDecorator(searchResponseDecoratorBinder(),
-                SampleDecorator.class,
-                SampleDecorator.Factory.class);
+        MapBinder<String, Factory<? extends MessageOutput>> outputMapBinder = outputsMapBinder();
+        installOutput(outputMapBinder, IcingaOutput.class, IcingaOutput.Factory.class);
     }
 }
