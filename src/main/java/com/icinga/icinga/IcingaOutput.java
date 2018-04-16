@@ -30,6 +30,7 @@ public class IcingaOutput implements MessageOutput{
     private static final String CK_ICINGA_PORT = "icinga_port";
     private static final String CK_ICINGA_USER = "icinga_user";
     private static final String CK_ICINGA_PASSWD = "icinga_passwd";
+    private static final Logger LOG = LoggerFactory.getLogger(IcingaOutput.class);
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private Configuration configuration;
 
@@ -46,12 +47,17 @@ public class IcingaOutput implements MessageOutput{
 
     @Override
     public void write(Message message) throws Exception {
+        //TODO find workaround
+        SSLUtilities.trustAllHostnames();
+        SSLUtilities.trustAllHttpsCertificates();
 
         URL url = new URL("https://" + configuration.getString(CK_ICINGA_USER) + ":" + configuration.getString(CK_ICINGA_PASSWD) + "@" + configuration.getString(CK_ICINGA_HOST) + ":" + configuration.getInt(CK_ICINGA_PORT) + "/v1/status");
 
+        LOG.info(url.toString());
+
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"))) {
             for (String line; (line = reader.readLine()) != null;) {
-                System.out.println(line);
+                LOG.info(line);
             }
         }
     }
