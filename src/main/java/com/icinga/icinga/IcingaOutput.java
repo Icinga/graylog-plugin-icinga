@@ -1,6 +1,5 @@
 package com.icinga.icinga;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
@@ -9,30 +8,39 @@ import org.graylog2.plugin.configuration.fields.*;
 import org.graylog2.plugin.outputs.MessageOutput;
 import org.graylog2.plugin.outputs.MessageOutputConfigurationException;
 import org.graylog2.plugin.streams.Stream;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import javax.net.ssl.*;
+import java.io.*;
+import java.lang.reflect.Array;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class IcingaOutput implements MessageOutput{
-    private static final String CK_ICINGA_HOST = "icinga_host";
-    private static final String CK_ICINGA_PORT = "icinga_port";
-    private static final String CK_ICINGA_USER = "icinga_user";
-    private static final String CK_ICINGA_PASSWD = "icinga_passwd";
-    private static final Logger LOG = LoggerFactory.getLogger(IcingaOutput.class);
-    private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    private Configuration configuration;
+public abstract class IcingaOutput implements MessageOutput {
+    protected static final String CK_ICINGA_ENDPOINTS = "icinga_endpoints";
+    protected static final String CK_ICINGA_USER = "icinga_user";
+    protected static final String CK_ICINGA_PASSWD = "icinga_passwd";
+    protected static final String CK_ICINGA_HOST_NAME = "icinga_host_name";
+    protected static final String CK_ICINGA_SERVICE_NAME = "icinga_service_name";
+    protected static final String CK_CREATE_OBJECT = "create_object";
+    protected static final String CK_OBJECT_TEMPLATES = "object_templates";
+    protected static final String CK_OBJECT_ATTRIBUTES = "object_attributes";
+    protected static final String CK_VERIFY_SSL = "verify_ssl";
+    protected static final String CK_SSL_CA_PEM = "ssl_ca_pem";
+
+
+    protected static final Logger LOG = LoggerFactory.getLogger(IcingaOutput.class);
+    protected final AtomicBoolean isRunning = new AtomicBoolean(false);
+    protected Configuration configuration;
 
     @Inject
     public IcingaOutput(@Assisted Configuration configuration) throws MessageOutputConfigurationException {
@@ -46,27 +54,111 @@ public class IcingaOutput implements MessageOutput{
     }
 
     @Override
-    public void write(Message message) throws Exception {
-        //TODO find workaround
-        SSLUtilities.trustAllHostnames();
-        SSLUtilities.trustAllHttpsCertificates();
-
-        URL url = new URL("https://" + configuration.getString(CK_ICINGA_USER) + ":" + configuration.getString(CK_ICINGA_PASSWD) + "@" + configuration.getString(CK_ICINGA_HOST) + ":" + configuration.getInt(CK_ICINGA_PORT) + "/v1/status");
-
-        LOG.info(url.toString());
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"))) {
-            for (String line; (line = reader.readLine()) != null;) {
-                LOG.info(line);
-            }
-        }
-    }
-
-    @Override
     public void write(List<Message> messages) throws Exception {
         for (Message message : messages) {
             write(message);
         }
+    }
+
+    protected IcingaHTTPResponse sendRequest(String method, String relativeURL, Map<String, String> params, Map<String, String> headers, String body) {
+        params = new TreeMap<>(params);
+        headers = new TreeMap<>(headers);
+        for (String endpoint : configuration.getList(CK_ICINGA_ENDPOINTS)) {
+            try {
+                List<String> paramStrings = new LinkedList<>();
+                for (Map.Entry<String, String> param : params.entrySet()) {
+                    paramStrings.add(URLEncoder.encode(param.getKey(), "UTF-8") + "=" + URLEncoder.encode(param.getValue(), "UTF-8"));
+                }
+
+                URL url = new URL("https://" + endpoint + "/v1/" + relativeURL + "?" + String.join("&", paramStrings));
+
+                HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+
+                if (!configuration.getBoolean(CK_VERIFY_SSL)) {
+                    SSLContext sc = SSLContext.getInstance("SSL");
+                    sc.init(
+                            null,
+                            new TrustManager[] {new X509TrustManager() {
+                                public X509Certificate[] getAcceptedIssuers() {
+                                    return null;
+                                }
+                                public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                                }
+                                public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                                }
+                            }},
+                            new SecureRandom()
+                    );
+
+                    con.setSSLSocketFactory(sc.getSocketFactory());
+                    con.setHostnameVerifier((s, ss) -> true);
+                } else {
+                    String caCert = configuration.getString(CK_SSL_CA_PEM);
+                    InputStream caCertStream = new ByteArrayInputStream(caCert.getBytes(StandardCharsets.UTF_8));
+
+                    Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(caCertStream);
+
+                    KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                    keyStore.load(null, null);
+                    keyStore.setCertificateEntry("ca", cert);
+
+                    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                    trustManagerFactory.init(keyStore);
+
+                    SSLContext sc = SSLContext.getInstance("SSL");
+                    sc.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
+
+                    con.setSSLSocketFactory(sc.getSocketFactory());
+
+                }
+
+                con.setRequestMethod(method);
+
+                String authorization = configuration.getString(CK_ICINGA_USER) + ":" + configuration.getString(CK_ICINGA_PASSWD);
+                String authorizationBase64 = Base64.getEncoder().encodeToString(authorization.getBytes());
+
+                headers.put("Authorization", "Basic " + authorizationBase64);
+                headers.put("Accept", "application/json");
+
+                for (Map.Entry<String, String> header : headers.entrySet()) {
+                    con.setRequestProperty(header.getKey(), header.getValue());
+                }
+
+                con.setDoOutput(true);
+                DataOutputStream out = new DataOutputStream(con.getOutputStream());
+                out.writeBytes(body);
+                out.flush();
+                out.close();
+
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuilder content = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+                in.close();
+
+                con.disconnect();
+
+                Map<String, String> responseHeaders = new TreeMap<>();
+
+                for (Map.Entry<String, List<String>> entry : con.getHeaderFields().entrySet()) {
+                    if (entry.getKey() != null) {
+                        responseHeaders.put(entry.getKey(), String.join(",", entry.getValue()));
+                    }
+                }
+
+
+                return new IcingaHTTPResponse(con.getResponseCode(), responseHeaders, content.toString());
+            } catch (Exception e) {
+                StringWriter stringWriter = new StringWriter();
+                e.printStackTrace(new PrintWriter(stringWriter));
+                LOG.error(stringWriter.toString());
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -74,53 +166,78 @@ public class IcingaOutput implements MessageOutput{
         isRunning.set(false);
     }
 
-    public interface Factory extends MessageOutput.Factory<IcingaOutput> {
-        @Override
-        IcingaOutput create(Stream stream, Configuration configuration);
-
-        @Override
-        Config getConfig();
-
-        @Override
-        Descriptor getDescriptor();
-    }
-
     public static class Config extends MessageOutput.Config {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
             final ConfigurationRequest configurationRequest = new ConfigurationRequest();
 
-            configurationRequest.addField(new TextField(
-                    CK_ICINGA_HOST, "Icinga Host", "",
-                    "Hostname of your Icinga 2 instance",
-                    ConfigurationField.Optional.NOT_OPTIONAL)
-            );
-
-            configurationRequest.addField(new NumberField(
-                    CK_ICINGA_PORT, "Icinga Port", 5665,
-                    "Port of your Icinga 2 API",
-                    ConfigurationField.Optional.OPTIONAL)
-            );
+            configurationRequest.addField(new ListField(
+                    CK_ICINGA_ENDPOINTS, "Icinga Endpoints",
+                    Collections.emptyList(), Collections.emptyMap(),
+                    "Endpoints of your Icinga 2 instances in format \"HOST:PORT\"",
+                    ConfigurationField.Optional.NOT_OPTIONAL,
+                    ListField.Attribute.ALLOW_CREATE
+            ));
 
             configurationRequest.addField(new TextField(
                     CK_ICINGA_USER, "Icinga User", "",
                     "User of your Icinga 2 API",
-                    ConfigurationField.Optional.NOT_OPTIONAL)
-            );
+                    ConfigurationField.Optional.NOT_OPTIONAL
+            ));
 
             configurationRequest.addField(new TextField(
                     CK_ICINGA_PASSWD, "Icinga Password", "",
                     "Password of your Icinga 2 API",
-                    ConfigurationField.Optional.NOT_OPTIONAL)
-            );
+                    ConfigurationField.Optional.NOT_OPTIONAL,
+                    TextField.Attribute.IS_PASSWORD
+            ));
+
+            configurationRequest.addField(new TextField(
+                    CK_ICINGA_HOST_NAME, "Icinga Host Name", "",
+                    "Icinga host to use for results",
+                    ConfigurationField.Optional.NOT_OPTIONAL
+            ));
+
+            configurationRequest.addField(new TextField(
+                    CK_ICINGA_SERVICE_NAME, "Icinga Service Name", "",
+                    "Icinga service to use for results",
+                    ConfigurationField.Optional.OPTIONAL
+            ));
+
+            configurationRequest.addField(new BooleanField(
+                    CK_CREATE_OBJECT, "Create object", false,
+                    "Create Icinga object if missing (Service if given, host otherwise)"
+            ));
+
+            configurationRequest.addField(new ListField(
+                    CK_OBJECT_TEMPLATES, "Object Templates",
+                    Collections.emptyList(), Collections.emptyMap(),
+                    "Templates to create the object from",
+                    ConfigurationField.Optional.OPTIONAL,
+                    ListField.Attribute.ALLOW_CREATE
+            ));
+
+            configurationRequest.addField(new ListField(
+                    CK_OBJECT_ATTRIBUTES, "Object Attributes",
+                    Collections.emptyList(), Collections.emptyMap(),
+                    "Attributes to set while creating an object (Format: ATTR=VALUE)",
+                    ConfigurationField.Optional.OPTIONAL,
+                    ListField.Attribute.ALLOW_CREATE
+            ));
+
+            configurationRequest.addField(new BooleanField(
+                    CK_VERIFY_SSL, "Verify SSL", true,
+                    "Verify the SSL certificates"
+            ));
+
+            configurationRequest.addField(new TextField(
+                    CK_SSL_CA_PEM, "SSL CA", "",
+                    "SSL CA Certificate (PEM)",
+                    ConfigurationField.Optional.OPTIONAL,
+                    TextField.Attribute.TEXTAREA
+            ));
 
             return configurationRequest;
-        }
-    }
-
-    public static class Descriptor extends MessageOutput.Descriptor {
-        public Descriptor() {
-            super("Icinga Output", false, "", "An output plugin sending Icinga 2 check results");
         }
     }
 }

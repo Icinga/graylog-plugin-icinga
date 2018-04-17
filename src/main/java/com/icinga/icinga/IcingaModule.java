@@ -46,6 +46,6 @@ public class IcingaModule extends PluginModule {
          */
 
         MapBinder<String, Factory<? extends MessageOutput>> outputMapBinder = outputsMapBinder();
-        installOutput(outputMapBinder, IcingaOutput.class, IcingaOutput.Factory.class);
+        installOutput(outputMapBinder, IcingaOutputAddComment.class, IcingaOutputAddComment.Factory.class);
     }
 }
