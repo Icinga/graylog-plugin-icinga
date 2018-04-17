@@ -60,65 +60,77 @@ public abstract class IcingaOutput implements MessageOutput {
         }
     }
 
-    protected IcingaHTTPResponse sendRequest(String method, String relativeURL, Map<String, String> params, Map<String, String> headers, String body) {
-        params = new TreeMap<>(params);
+    protected IcingaHTTPResponse sendRequest(String method, String relativeURL, Map<String, String> params, Map<String, String> headers, String body) throws Exception {
+        List<String> paramStrings = new LinkedList<>();
+        for (Map.Entry<String, String> param : params.entrySet()) {
+            paramStrings.add(URLEncoder.encode(param.getKey(), "UTF-8") + "=" + URLEncoder.encode(param.getValue(), "UTF-8"));
+        }
+
+        relativeURL = "/v1/" + relativeURL + "?" + String.join("&", paramStrings);
+
         headers = new TreeMap<>(headers);
+
+        SSLSocketFactory socketFactory = null;
+        HostnameVerifier hostnameVerifier = null;
+
+        if (!configuration.getBoolean(CK_VERIFY_SSL)) {
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(
+                    null,
+                    new TrustManager[] {new X509TrustManager() {
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        }
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        }
+                    }},
+                    new SecureRandom()
+            );
+
+            socketFactory = sc.getSocketFactory();
+            hostnameVerifier = (s, ss) -> true;
+        } else if (configuration.stringIsSet(CK_SSL_CA_PEM)) {
+            String caCert = configuration.getString(CK_SSL_CA_PEM);
+            InputStream caCertStream = new ByteArrayInputStream(caCert.getBytes(StandardCharsets.UTF_8));
+
+            Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(caCertStream);
+
+            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keyStore.load(null, null);
+            keyStore.setCertificateEntry("ca", cert);
+
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(keyStore);
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
+
+            socketFactory = sc.getSocketFactory();
+        }
+
+        String authorization = configuration.getString(CK_ICINGA_USER) + ":" + configuration.getString(CK_ICINGA_PASSWD);
+        String authorizationBase64 = Base64.getEncoder().encodeToString(authorization.getBytes());
+
+        headers.put("Authorization", "Basic " + authorizationBase64);
+        headers.put("Accept", "application/json");
+
         for (String endpoint : configuration.getList(CK_ICINGA_ENDPOINTS)) {
             try {
-                List<String> paramStrings = new LinkedList<>();
-                for (Map.Entry<String, String> param : params.entrySet()) {
-                    paramStrings.add(URLEncoder.encode(param.getKey(), "UTF-8") + "=" + URLEncoder.encode(param.getValue(), "UTF-8"));
-                }
-
-                URL url = new URL("https://" + endpoint + "/v1/" + relativeURL + "?" + String.join("&", paramStrings));
+                URL url = new URL("https://" + endpoint + relativeURL);
 
                 HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
 
-                if (!configuration.getBoolean(CK_VERIFY_SSL)) {
-                    SSLContext sc = SSLContext.getInstance("SSL");
-                    sc.init(
-                            null,
-                            new TrustManager[] {new X509TrustManager() {
-                                public X509Certificate[] getAcceptedIssuers() {
-                                    return null;
-                                }
-                                public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                                }
-                                public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                                }
-                            }},
-                            new SecureRandom()
-                    );
+                if (socketFactory != null) {
+                    con.setSSLSocketFactory(socketFactory);
+                }
 
-                    con.setSSLSocketFactory(sc.getSocketFactory());
-                    con.setHostnameVerifier((s, ss) -> true);
-                } else if (configuration.stringIsSet(CK_SSL_CA_PEM)) {
-                    String caCert = configuration.getString(CK_SSL_CA_PEM);
-                    InputStream caCertStream = new ByteArrayInputStream(caCert.getBytes(StandardCharsets.UTF_8));
-
-                    Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(caCertStream);
-
-                    KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                    keyStore.load(null, null);
-                    keyStore.setCertificateEntry("ca", cert);
-
-                    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                    trustManagerFactory.init(keyStore);
-
-                    SSLContext sc = SSLContext.getInstance("SSL");
-                    sc.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
-
-                    con.setSSLSocketFactory(sc.getSocketFactory());
-
+                if (hostnameVerifier != null) {
+                    con.setHostnameVerifier(hostnameVerifier);
                 }
 
                 con.setRequestMethod(method);
-
-                String authorization = configuration.getString(CK_ICINGA_USER) + ":" + configuration.getString(CK_ICINGA_PASSWD);
-                String authorizationBase64 = Base64.getEncoder().encodeToString(authorization.getBytes());
-
-                headers.put("Authorization", "Basic " + authorizationBase64);
-                headers.put("Accept", "application/json");
 
                 for (Map.Entry<String, String> header : headers.entrySet()) {
                     con.setRequestProperty(header.getKey(), header.getValue());
