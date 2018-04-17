@@ -92,7 +92,7 @@ public abstract class IcingaOutput implements MessageOutput {
 
                     con.setSSLSocketFactory(sc.getSocketFactory());
                     con.setHostnameVerifier((s, ss) -> true);
-                } else {
+                } else if (configuration.stringIsSet(CK_SSL_CA_PEM)) {
                     String caCert = configuration.getString(CK_SSL_CA_PEM);
                     InputStream caCertStream = new ByteArrayInputStream(caCert.getBytes(StandardCharsets.UTF_8));
 
