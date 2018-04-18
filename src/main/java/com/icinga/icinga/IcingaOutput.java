@@ -85,12 +85,12 @@ public abstract class IcingaOutput implements MessageOutput {
 
         headers = new TreeMap<>(headers);
 
-        SSLConnectionSocketFactory socketFactory = null;
+        SSLContext sslContext = null;
         HostnameVerifier hostnameVerifier = null;
 
         if (!configuration.getBoolean(CK_VERIFY_SSL)) {
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(
+            sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(
                     null,
                     new TrustManager[] {new X509TrustManager() {
                         public X509Certificate[] getAcceptedIssuers() {
@@ -104,7 +104,6 @@ public abstract class IcingaOutput implements MessageOutput {
                     new SecureRandom()
             );
 
-            socketFactory = new SSLConnectionSocketFactory(sc);
             hostnameVerifier = (s, ss) -> true;
         } else if (configuration.stringIsSet(CK_SSL_CA_PEM)) {
             String caCert = configuration.getString(CK_SSL_CA_PEM);
@@ -119,10 +118,8 @@ public abstract class IcingaOutput implements MessageOutput {
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(keyStore);
 
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
-
-            socketFactory = new SSLConnectionSocketFactory(sc);
+            sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
         }
 
         String authorization = configuration.getString(CK_ICINGA_USER) + ":" + configuration.getString(CK_ICINGA_PASSWD);
@@ -132,11 +129,11 @@ public abstract class IcingaOutput implements MessageOutput {
         headers.put("Accept", "application/json");
 
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+        if (sslContext != null) {
+            clientBuilder.setSSLContext(sslContext);
+        }
         if (hostnameVerifier != null) {
             clientBuilder.setSSLHostnameVerifier(hostnameVerifier);
-        }
-        if (socketFactory != null) {
-            clientBuilder.setSSLSocketFactory(socketFactory);
         }
 
         HttpClient client = clientBuilder.build();
