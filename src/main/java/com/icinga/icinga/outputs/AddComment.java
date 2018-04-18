@@ -48,7 +48,7 @@ public class AddComment extends IcingaOutput {
         HttpResponse response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
 
         if (response.getStatusLine().getStatusCode() == 404) {
-            createIcingaObject();
+            createIcingaObject(message);
             response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
 
             if (response.getStatusLine().getStatusCode() == 404) {
@@ -76,7 +76,7 @@ public class AddComment extends IcingaOutput {
             //TODO add stuff;
 
             baseRequest.addField(new TextField(
-                    CK_COMMENT_AUTHOR, "Comment Author", "",
+                    CK_COMMENT_AUTHOR, "Comment Author", "graylog",
                     "Author of the comment",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
