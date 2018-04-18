@@ -2,10 +2,18 @@ package com.icinga.icinga;
 
 import com.google.inject.assistedinject.Assisted;
 import org.apache.commons.lang.text.StrSubstitutor;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -67,7 +75,7 @@ public abstract class IcingaOutput implements MessageOutput {
         return (new StrSubstitutor(message.getFields())).replace(configuration.getString(configField));
     }
 
-    protected IcingaHTTPResponse sendRequest(String method, String relativeURL, Map<String, String> params, Map<String, String> headers, String body) throws Exception {
+    protected HttpResponse sendRequest(HttpRequestBase method, String relativeURL, Map<String, String> params, Map<String, String> headers, String body) throws Exception {
         List<String> paramStrings = new LinkedList<>();
         for (Map.Entry<String, String> param : params.entrySet()) {
             paramStrings.add(URLEncoder.encode(param.getKey(), "UTF-8") + "=" + URLEncoder.encode(param.getValue(), "UTF-8"));
@@ -77,7 +85,7 @@ public abstract class IcingaOutput implements MessageOutput {
 
         headers = new TreeMap<>(headers);
 
-        SSLSocketFactory socketFactory = null;
+        SSLConnectionSocketFactory socketFactory = null;
         HostnameVerifier hostnameVerifier = null;
 
         if (!configuration.getBoolean(CK_VERIFY_SSL)) {
@@ -96,7 +104,7 @@ public abstract class IcingaOutput implements MessageOutput {
                     new SecureRandom()
             );
 
-            socketFactory = sc.getSocketFactory();
+            socketFactory = new SSLConnectionSocketFactory(sc);
             hostnameVerifier = (s, ss) -> true;
         } else if (configuration.stringIsSet(CK_SSL_CA_PEM)) {
             String caCert = configuration.getString(CK_SSL_CA_PEM);
@@ -114,7 +122,7 @@ public abstract class IcingaOutput implements MessageOutput {
             SSLContext sc = SSLContext.getInstance("SSL");
             sc.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
 
-            socketFactory = sc.getSocketFactory();
+            socketFactory = new SSLConnectionSocketFactory(sc);
         }
 
         String authorization = configuration.getString(CK_ICINGA_USER) + ":" + configuration.getString(CK_ICINGA_PASSWD);
@@ -123,53 +131,29 @@ public abstract class IcingaOutput implements MessageOutput {
         headers.put("Authorization", "Basic " + authorizationBase64);
         headers.put("Accept", "application/json");
 
+        HttpClient client = HttpClientBuilder.create().setSSLHostnameVerifier(hostnameVerifier).setSSLSocketFactory(socketFactory).build();
+
         for (String endpoint : configuration.getList(CK_ICINGA_ENDPOINTS)) {
             try {
-                URL url = new URL("https://" + endpoint + relativeURL);
+                URI url = new URI("https://" + endpoint + relativeURL);
 
-                HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-
-                if (socketFactory != null) {
-                    con.setSSLSocketFactory(socketFactory);
-                }
-
-                if (hostnameVerifier != null) {
-                    con.setHostnameVerifier(hostnameVerifier);
-                }
-
-                con.setRequestMethod(method);
+                method.setURI(url);
 
                 for (Map.Entry<String, String> header : headers.entrySet()) {
-                    con.setRequestProperty(header.getKey(), header.getValue());
+                    method.addHeader(header.getKey(), header.getValue());
                 }
 
-                con.setDoOutput(true);
-                DataOutputStream out = new DataOutputStream(con.getOutputStream());
-                out.writeBytes(body);
-                out.flush();
-                out.close();
-
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(con.getInputStream()));
-                String inputLine;
-                StringBuilder content = new StringBuilder();
-                while ((inputLine = in.readLine()) != null) {
-                    content.append(inputLine);
-                }
-                in.close();
-
-                con.disconnect();
-
-                Map<String, String> responseHeaders = new TreeMap<>();
-
-                for (Map.Entry<String, List<String>> entry : con.getHeaderFields().entrySet()) {
-                    if (entry.getKey() != null) {
-                        responseHeaders.put(entry.getKey(), String.join(",", entry.getValue()));
-                    }
+                if (method instanceof HttpEntityEnclosingRequestBase) {
+                    HttpEntity entity = new ByteArrayEntity(body.getBytes("UTF-8"));
+                    ((HttpEntityEnclosingRequestBase) method).setEntity(entity);
                 }
 
+                HttpResponse response = client.execute(method);
+                String result = EntityUtils.toString(response.getEntity());
 
-                return new IcingaHTTPResponse(con.getResponseCode(), responseHeaders, content.toString());
+                LOG.info(result);
+
+                return response;
             } catch (Exception e) {
                 StringWriter stringWriter = new StringWriter();
                 e.printStackTrace(new PrintWriter(stringWriter));
@@ -201,7 +185,7 @@ public abstract class IcingaOutput implements MessageOutput {
         jsonBody.add("attrs", attributes);
 
         if (!configuration.stringIsSet(CK_ICINGA_SERVICE_NAME)) {
-            IcingaHTTPResponse response = sendRequest("PUT", "objects/hosts" + configuration.getString(CK_ICINGA_HOST_NAME), Collections.emptyMap(), Collections.emptyMap(), jsonBody.build().toString());
+            HttpResponse response = sendRequest(new HttpPut(), "objects/hosts" + configuration.getString(CK_ICINGA_HOST_NAME), Collections.emptyMap(), Collections.emptyMap(), jsonBody.build().toString());
             LOG.info(response.toString());
         } else {
 
