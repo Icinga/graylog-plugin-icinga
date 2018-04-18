@@ -1,5 +1,6 @@
 package com.icinga.icinga;
 
+import com.icinga.icinga.outputs.AddComment;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 import org.graylog2.plugin.outputs.MessageOutput;
@@ -46,6 +47,6 @@ public class IcingaModule extends PluginModule {
          */
 
         MapBinder<String, Factory<? extends MessageOutput>> outputMapBinder = outputsMapBinder();
-        installOutput(outputMapBinder, IcingaOutputAddComment.class, IcingaOutputAddComment.Factory.class);
+        installOutput(outputMapBinder, AddComment.class, AddComment.Factory.class);
     }
 }

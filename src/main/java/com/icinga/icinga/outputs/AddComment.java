@@ -1,6 +1,8 @@
-package com.icinga.icinga;
+package com.icinga.icinga.outputs;
 
 import com.google.inject.assistedinject.Assisted;
+import com.icinga.icinga.IcingaHTTPResponse;
+import com.icinga.icinga.IcingaOutput;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -15,12 +17,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class IcingaOutputAddComment extends IcingaOutput {
+public class AddComment extends IcingaOutput {
     private static final String CK_COMMENT_AUTHOR = "comment_author";
     private static final String CK_COMMENT = "comment";
 
     @Inject
-    public IcingaOutputAddComment(@Assisted Configuration configuration) throws MessageOutputConfigurationException {
+    public AddComment(@Assisted Configuration configuration) throws MessageOutputConfigurationException {
         super(configuration);
 
     }
@@ -47,9 +49,9 @@ public class IcingaOutputAddComment extends IcingaOutput {
         LOG.info(response.getBody());
     }
 
-    public interface Factory extends MessageOutput.Factory<IcingaOutputAddComment> {
+    public interface Factory extends MessageOutput.Factory<AddComment> {
         @Override
-        IcingaOutputAddComment create(Stream stream, Configuration configuration);
+        AddComment create(Stream stream, Configuration configuration);
 
         @Override
         Config getConfig();
