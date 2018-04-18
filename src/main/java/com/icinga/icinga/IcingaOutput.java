@@ -2,25 +2,27 @@ package com.icinga.icinga;
 
 import com.google.inject.assistedinject.Assisted;
 import org.apache.commons.lang.text.StrSubstitutor;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
 import org.graylog2.plugin.configuration.fields.*;
 import org.graylog2.plugin.outputs.MessageOutput;
 import org.graylog2.plugin.outputs.MessageOutputConfigurationException;
-import org.graylog2.plugin.streams.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.json.*;
 import javax.net.ssl.*;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -176,6 +178,36 @@ public abstract class IcingaOutput implements MessageOutput {
         }
 
         return null;
+    }
+
+    boolean createIcingaObject() throws Exception {
+        //curl -k -s -u root:icinga -H 'Accept: application/json' -X PUT 'https://localhost:5665/v1/objects/hosts/example.localdomain' \
+        //-d '{ "templates": [ "generic-host" ], "attrs": { "address": "192.168.1.1", "check_command": "hostalive", "vars.os" : "Linux" } }' \
+
+        JsonObjectBuilder jsonBody = Json.createObjectBuilder();
+        JsonArrayBuilder templates = Json.createArrayBuilder();
+        for (String template : configuration.getList(CK_OBJECT_TEMPLATES)) {
+            templates.add(template);
+        }
+
+        jsonBody.add("templates", templates);
+
+        JsonObjectBuilder attributes = Json.createObjectBuilder();
+        for (String attribute : configuration.getList(CK_OBJECT_ATTRIBUTES)) {
+            String[] parts = attribute.split("=");
+            attributes.add(parts[0], parts[1]);
+        }
+
+        jsonBody.add("attrs", attributes);
+
+        if (!configuration.stringIsSet(CK_ICINGA_SERVICE_NAME)) {
+            IcingaHTTPResponse response = sendRequest("PUT", "objects/hosts" + configuration.getString(CK_ICINGA_HOST_NAME), Collections.emptyMap(), Collections.emptyMap(), jsonBody.build().toString());
+            LOG.info(response.toString());
+        } else {
+
+        }
+
+        return true;
     }
 
     @Override
