@@ -46,6 +46,15 @@ public class AddComment extends IcingaOutput {
         params.put("comment", resolveConfigField(CK_COMMENT, message));
 
         HttpResponse response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
+
+        if (response.getStatusLine().getStatusCode() == 404) {
+            createIcingaObject();
+            response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
+
+            if (response.getStatusLine().getStatusCode() == 404) {
+                LOG.error("Could not add comment: " + response.toString());
+            }
+        }
     }
 
     public interface Factory extends MessageOutput.Factory<AddComment> {

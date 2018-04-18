@@ -164,7 +164,7 @@ public abstract class IcingaOutput implements MessageOutput {
         return null;
     }
 
-    boolean createIcingaObject() throws Exception {
+    protected boolean createIcingaObject() throws Exception {
         //curl -k -s -u root:icinga -H 'Accept: application/json' -X PUT 'https://localhost:5665/v1/objects/hosts/example.localdomain' \
         //-d '{ "templates": [ "generic-host" ], "attrs": { "address": "192.168.1.1", "check_command": "hostalive", "vars.os" : "Linux" } }' \
 
@@ -185,10 +185,11 @@ public abstract class IcingaOutput implements MessageOutput {
         jsonBody.add("attrs", attributes);
 
         if (!configuration.stringIsSet(CK_ICINGA_SERVICE_NAME)) {
-            HttpResponse response = sendRequest(new HttpPut(), "objects/hosts" + configuration.getString(CK_ICINGA_HOST_NAME), Collections.emptyMap(), Collections.emptyMap(), jsonBody.build().toString());
-            LOG.info(response.toString());
+            HttpResponse response = sendRequest(new HttpPut(), "objects/hosts/" + configuration.getString(CK_ICINGA_HOST_NAME), Collections.emptyMap(), Collections.emptyMap(), jsonBody.build().toString());
+            LOG.info("createIcingaObject: " + response.toString());
         } else {
-
+            HttpResponse response = sendRequest(new HttpPut(), "objects/service/" + configuration.getString(CK_ICINGA_HOST_NAME) + "!" + configuration.getString(CK_ICINGA_SERVICE_NAME), Collections.emptyMap(), Collections.emptyMap(), jsonBody.build().toString());
+            LOG.info("createIcingaObject: " + response.toString());
         }
 
         return true;
