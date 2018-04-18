@@ -45,9 +45,6 @@ public class AddComment extends IcingaOutput {
         params.put("author", resolveConfigField(CK_COMMENT_AUTHOR, message));
         params.put("comment", resolveConfigField(CK_COMMENT, message));
 
-        IcingaHTTPResponse response = sendRequest("POST", "actions/add-comment", params, Collections.emptyMap(), "");
-
-        LOG.info(response.getBody());
         HttpResponse response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
     }
 
