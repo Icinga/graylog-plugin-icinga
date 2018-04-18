@@ -49,6 +49,16 @@
     </distributionManagement>
 
     <repositories>
+        <repository>
+            <id>central</id>
+            <name>Maven Repository Switchboard</name>
+            <layout>default</layout>
+            <url>https://repo1.maven.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+
         <!-- to make our snapshot releases work with Travis et al -->
         <repository>
             <id>sonatype-nexus-snapshots</id>
@@ -80,6 +90,13 @@
             <artifactId>graylog2-server</artifactId>
             <version>${graylog.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.7</version>
         </dependency>
     </dependencies>
 

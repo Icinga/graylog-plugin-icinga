@@ -33,14 +33,14 @@ public class IcingaOutputAddComment extends IcingaOutput {
 
         if (configuration.stringIsSet(CK_ICINGA_SERVICE_NAME)) {
             params.put("type", "Service");
-            params.put("service", configuration.getString(CK_ICINGA_HOST_NAME) + "!" + configuration.getString(CK_ICINGA_SERVICE_NAME));
+            params.put("service", resolveConfigField(CK_ICINGA_HOST_NAME, message) + "!" + resolveConfigField(CK_ICINGA_SERVICE_NAME, message));
         } else {
             params.put("type", "Host");
-            params.put("host", configuration.getString(CK_ICINGA_HOST_NAME));
+            params.put("host", resolveConfigField(CK_ICINGA_HOST_NAME, message));
         }
 
-        params.put("author", configuration.getString(CK_COMMENT_AUTHOR));
-        params.put("comment", configuration.getString(CK_COMMENT));
+        params.put("author", resolveConfigField(CK_COMMENT_AUTHOR, message));
+        params.put("comment", resolveConfigField(CK_COMMENT, message));
 
         IcingaHTTPResponse response = sendRequest("POST", "actions/add-comment", params, Collections.emptyMap(), "");
 

@@ -1,6 +1,7 @@
 package com.icinga.icinga;
 
 import com.google.inject.assistedinject.Assisted;
+import org.apache.commons.lang.text.StrSubstitutor;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -58,6 +59,10 @@ public abstract class IcingaOutput implements MessageOutput {
         for (Message message : messages) {
             write(message);
         }
+    }
+
+    protected String resolveConfigField(String configField, Message message) {
+        return (new StrSubstitutor(message.getFields())).replace(configuration.getString(configField));
     }
 
     protected IcingaHTTPResponse sendRequest(String method, String relativeURL, Map<String, String> params, Map<String, String> headers, String body) throws Exception {
