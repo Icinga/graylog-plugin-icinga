@@ -1,8 +1,9 @@
 package com.icinga.icinga.outputs;
 
 import com.google.inject.assistedinject.Assisted;
-import com.icinga.icinga.IcingaHTTPResponse;
 import com.icinga.icinga.IcingaOutput;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -47,6 +48,7 @@ public class AddComment extends IcingaOutput {
         IcingaHTTPResponse response = sendRequest("POST", "actions/add-comment", params, Collections.emptyMap(), "");
 
         LOG.info(response.getBody());
+        HttpResponse response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
     }
 
     public interface Factory extends MessageOutput.Factory<AddComment> {
