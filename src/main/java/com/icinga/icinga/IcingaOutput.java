@@ -131,7 +131,15 @@ public abstract class IcingaOutput implements MessageOutput {
         headers.put("Authorization", "Basic " + authorizationBase64);
         headers.put("Accept", "application/json");
 
-        HttpClient client = HttpClientBuilder.create().setSSLHostnameVerifier(hostnameVerifier).setSSLSocketFactory(socketFactory).build();
+        HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+        if (hostnameVerifier != null) {
+            clientBuilder.setSSLHostnameVerifier(hostnameVerifier);
+        }
+        if (socketFactory != null) {
+            clientBuilder.setSSLSocketFactory(socketFactory);
+        }
+
+        HttpClient client = clientBuilder.build();
 
         for (String endpoint : configuration.getList(CK_ICINGA_ENDPOINTS)) {
             try {
