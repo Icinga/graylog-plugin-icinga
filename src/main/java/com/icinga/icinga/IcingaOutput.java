@@ -149,6 +149,7 @@ public abstract class IcingaOutput implements MessageOutput {
         }
 
         HttpClient client = clientBuilder.build();
+        HttpResponse response = null;
 
         for (String endpoint : configuration.getList(CK_ICINGA_ENDPOINTS)) {
             try {
@@ -165,12 +166,14 @@ public abstract class IcingaOutput implements MessageOutput {
                     ((HttpEntityEnclosingRequestBase) method).setEntity(entity);
                 }
 
-                HttpResponse response = client.execute(method);
+                response = client.execute(method);
                 String result = EntityUtils.toString(response.getEntity());
 
                 LOG.info(result);
 
-                return response;
+                if (response.getStatusLine().getStatusCode() != 500) {
+                    break;
+                }
             } catch (Exception e) {
                 StringWriter stringWriter = new StringWriter();
                 e.printStackTrace(new PrintWriter(stringWriter));
@@ -178,7 +181,7 @@ public abstract class IcingaOutput implements MessageOutput {
             }
         }
 
-        return null;
+        return response;
     }
 
     protected HttpResponse createIcingaObject(Message message) throws Exception {
