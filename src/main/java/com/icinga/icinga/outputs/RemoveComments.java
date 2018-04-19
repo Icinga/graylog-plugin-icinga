@@ -68,7 +68,7 @@ public class RemoveComments extends IcingaOutput {
             ConfigurationRequest baseRequest = super.getRequestedConfiguration();
 
             baseRequest.addField(new TextField(
-                    CK_COMMENT_AUTHOR, "Comments Author", "",
+                    CK_COMMENT_AUTHOR, "Comments Author", "graylog",
                     "Author of the comments",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
