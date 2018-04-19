@@ -184,14 +184,14 @@ public abstract class IcingaOutput implements MessageOutput {
     protected HttpResponse createIcingaObject(Message message) throws Exception {
         JsonObjectBuilder jsonBody = Json.createObjectBuilder();
         JsonArrayBuilder templates = Json.createArrayBuilder();
-        for (String template : configuration.getList(CK_OBJECT_TEMPLATES)) {
+        for (String template : resolveConfigList(CK_OBJECT_TEMPLATES, message)) {
             templates.add(template);
         }
 
         jsonBody.add("templates", templates);
 
         JsonObjectBuilder attributes = Json.createObjectBuilder();
-        for (String attribute : configuration.getList(CK_OBJECT_ATTRIBUTES)) {
+        for (String attribute : resolveConfigList(CK_OBJECT_ATTRIBUTES, message)) {
             String[] parts = attribute.split("=");
             attributes.add(parts[0], parts[1]);
         }
