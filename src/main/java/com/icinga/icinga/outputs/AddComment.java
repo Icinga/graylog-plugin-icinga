@@ -73,8 +73,6 @@ public class AddComment extends IcingaOutput {
         public ConfigurationRequest getRequestedConfiguration() {
             ConfigurationRequest baseRequest = super.getRequestedConfiguration();
 
-            //TODO add stuff;
-
             baseRequest.addField(new TextField(
                     CK_COMMENT_AUTHOR, "Comment Author", "graylog",
                     "Author of the comment",
