@@ -44,7 +44,7 @@ public class AddComment extends IcingaOutput {
 
         HttpResponse response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
 
-        if (response.getStatusLine().getStatusCode() == 404) {
+        if (response.getStatusLine().getStatusCode() == 404 && configuration.getBoolean(CK_CREATE_OBJECT)) {
             response = createIcingaObject(message);
             if (response.getStatusLine().getStatusCode() == 200) {
                 response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");

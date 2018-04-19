@@ -58,7 +58,7 @@ public class ProcessCheckResult extends IcingaOutput {
 
         HttpResponse response = sendRequest(new HttpPost(), "actions/process-check-result", params, Collections.emptyMap(), jsonData.build().toString());
 
-        if (response.getStatusLine().getStatusCode() == 404) {
+        if (response.getStatusLine().getStatusCode() == 404 && configuration.getBoolean(CK_CREATE_OBJECT)) {
             response = createIcingaObject(message);
             if (response.getStatusLine().getStatusCode() == 200) {
                 response = sendRequest(new HttpPost(), "actions/process-check-result", params, Collections.emptyMap(), jsonData.build().toString());
