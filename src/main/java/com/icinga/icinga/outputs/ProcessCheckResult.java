@@ -64,6 +64,7 @@ public class ProcessCheckResult extends IcingaOutput {
                 response = sendRequest(new HttpPost(), "actions/process-check-result", params, Collections.emptyMap(), jsonData.build().toString());
             } else {
                 LOG.error("Could not create Icinga object while processing a check result: " + response.toString());
+                return;
             }
         }
 

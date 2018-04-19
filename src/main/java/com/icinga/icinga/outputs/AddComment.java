@@ -50,6 +50,7 @@ public class AddComment extends IcingaOutput {
                 response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
             } else {
                 LOG.error("Could not create Icinga object while adding a comment: " + response.toString());
+                return;
             }
         }
 
