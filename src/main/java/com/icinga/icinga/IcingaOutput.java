@@ -170,7 +170,7 @@ public abstract class IcingaOutput implements MessageOutput {
         return null;
     }
 
-    protected boolean createIcingaObject(Message message) throws Exception {
+    protected HttpResponse createIcingaObject(Message message) throws Exception {
         JsonObjectBuilder jsonBody = Json.createObjectBuilder();
         JsonArrayBuilder templates = Json.createArrayBuilder();
         for (String template : configuration.getList(CK_OBJECT_TEMPLATES)) {
@@ -188,14 +188,10 @@ public abstract class IcingaOutput implements MessageOutput {
         jsonBody.add("attrs", attributes);
 
         if (!configuration.stringIsSet(CK_ICINGA_SERVICE_NAME)) {
-            HttpResponse response = sendRequest(new HttpPut(), "objects/hosts/" + resolveConfigField(CK_ICINGA_HOST_NAME, message), Collections.emptyMap(), Collections.emptyMap(), jsonBody.build().toString());
-            LOG.info("createIcingaObject: " + response.toString());
+            return sendRequest(new HttpPut(), "objects/hosts/" + resolveConfigField(CK_ICINGA_HOST_NAME, message), Collections.emptyMap(), Collections.emptyMap(), jsonBody.build().toString());
         } else {
-            HttpResponse response = sendRequest(new HttpPut(), "objects/services/" + resolveConfigField(CK_ICINGA_HOST_NAME, message) + "!" + resolveConfigField(CK_ICINGA_SERVICE_NAME, message), Collections.emptyMap(), Collections.emptyMap(), jsonBody.build().toString());
-            LOG.info("createIcingaObject: " + response.toString());
+            return sendRequest(new HttpPut(), "objects/services/" + resolveConfigField(CK_ICINGA_HOST_NAME, message) + "!" + resolveConfigField(CK_ICINGA_SERVICE_NAME, message), Collections.emptyMap(), Collections.emptyMap(), jsonBody.build().toString());
         }
-
-        return true;
     }
 
     private StringBuilder urlEncode(String s) {

@@ -45,12 +45,16 @@ public class AddComment extends IcingaOutput {
         HttpResponse response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
 
         if (response.getStatusLine().getStatusCode() == 404) {
-            createIcingaObject(message);
-            response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
-
-            if (response.getStatusLine().getStatusCode() == 404) {
-                LOG.error("Could not add comment: " + response.toString());
+            response = createIcingaObject(message);
+            if (response.getStatusLine().getStatusCode() == 200) {
+                response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
+            } else {
+                LOG.error("Could not create Icinga object while adding a comment: " + response.toString());
             }
+        }
+
+        if (response.getStatusLine().getStatusCode() != 200) {
+            LOG.error("Could not add comment: " + response.toString());
         }
     }
 
