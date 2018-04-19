@@ -1,10 +1,6 @@
 package com.icinga.icinga;
 
-import com.icinga.icinga.outputs.AddComment;
-import com.icinga.icinga.outputs.RemoveComments;
-import com.icinga.icinga.outputs.RemoveDowntimes;
-import com.icinga.icinga.outputs.ProcessCheckResult;
-import com.icinga.icinga.outputs.ScheduleDowntime;
+import com.icinga.icinga.outputs.*;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 import org.graylog2.plugin.outputs.MessageOutput;
@@ -56,5 +52,6 @@ public class IcingaModule extends PluginModule {
         installOutput(outputMapBinder, ProcessCheckResult.class, ProcessCheckResult.Factory.class);
         installOutput(outputMapBinder, ScheduleDowntime.class, ScheduleDowntime.Factory.class);
         installOutput(outputMapBinder, RemoveDowntimes.class, RemoveDowntimes.Factory.class);
+        installOutput(outputMapBinder, SendCustomNotification.class, SendCustomNotification.Factory.class);
     }
 }
