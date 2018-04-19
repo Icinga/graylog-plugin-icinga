@@ -50,7 +50,6 @@ public class ProcessCheckResult extends IcingaOutput {
         JsonObjectBuilder jsonData = Json.createObjectBuilder();
         JsonArrayBuilder perfData = Json.createArrayBuilder();
         for (String metric : resolveConfigList(CK_PERF_DATA, message)) {
-            LOG.info("Metric: " + metric);
             perfData.add(metric);
         }
 

@@ -30,8 +30,6 @@ public class RemoveDowntimes extends IcingaOutput {
 
     @Override
     public void write(Message message) throws Exception {
-        LOG.info(message.toString());
-
         StringBuilder filter = new StringBuilder();
         filter.append("downtime.author == ");
         filter.append(Icinga2Filter.quoteString(resolveConfigField(CK_DOWNTIME_AUTHOR, message)));
