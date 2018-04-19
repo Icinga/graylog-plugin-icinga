@@ -28,6 +28,7 @@ import javax.json.*;
 import javax.net.ssl.*;
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -76,9 +77,9 @@ public abstract class IcingaOutput implements MessageOutput {
     }
 
     protected HttpResponse sendRequest(HttpRequestBase method, String relativeURL, Map<String, String> params, Map<String, String> headers, String body) throws Exception {
-        List<String> paramStrings = new LinkedList<>();
+        List<StringBuilder> paramStrings = new LinkedList<>();
         for (Map.Entry<String, String> param : params.entrySet()) {
-            paramStrings.add(URLEncoder.encode(param.getKey(), "UTF-8") + "=" + URLEncoder.encode(param.getValue(), "UTF-8"));
+            paramStrings.add(urlEncode(param.getKey()).append('=').append(urlEncode(param.getValue())));
         }
 
         relativeURL = "/v1/" + relativeURL + "?" + String.join("&", paramStrings);
@@ -195,6 +196,40 @@ public abstract class IcingaOutput implements MessageOutput {
         }
 
         return true;
+    }
+
+    private StringBuilder urlEncode(String s) {
+        StringBuilder result = new StringBuilder();
+        Formatter formatter = new Formatter(result, Locale.US);
+        ByteBuffer buffer = StandardCharsets.UTF_8.encode(s);
+        int current;
+
+        while (buffer.hasRemaining()) {
+            current = buffer.get();
+            current += 256;
+            current %= 256;
+
+            switch (current) {
+                case 45:  // -
+                case 95:  // _
+                case 46:  // .
+                case 126: // ~
+                    result.append((char)current);
+                    break;
+
+                default:
+                    if (48 <= current && current <= 57     // 0-9
+                        || 65 <= current && current <= 90  // A-Z
+                        || 97 <= current && current <= 122 // a-z
+                    ) {
+                        result.append((char)current);
+                    } else {
+                        formatter.format("%%%02X", current);
+                    }
+            }
+        }
+
+        return result;
     }
 
     @Override
