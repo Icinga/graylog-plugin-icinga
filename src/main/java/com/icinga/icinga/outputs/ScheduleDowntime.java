@@ -63,17 +63,22 @@ public class ScheduleDowntime extends IcingaOutput {
         HttpResponse response = sendRequest(new HttpPost(), "actions/schedule-downtime", params, Collections.emptyMap(), body);
 
         if (response.getStatusLine().getStatusCode() == 404 && configuration.getBoolean(CK_CREATE_OBJECT)) {
+            LOG.debug("Icinga object "
+                + configuration.getString(CK_ICINGA_HOST_NAME)
+                + (configuration.stringIsSet(CK_ICINGA_SERVICE_NAME) ? "!" + configuration.getString(CK_ICINGA_SERVICE_NAME) : "")
+                + " could not be found. Trying to create it."
+            );
             response = createIcingaObject(message);
             if (response.getStatusLine().getStatusCode() == 200) {
                 response = sendRequest(new HttpPost(), "actions/schedule-downtime", params, Collections.emptyMap(), body);
             } else {
-                LOG.error("Could not create Icinga object while scheduling a downtime: " + response);
+                LOG.debug("Could not create Icinga object while scheduling a downtime: " + response);
                 return;
             }
         }
 
         if (response.getStatusLine().getStatusCode() != 200) {
-            LOG.error("Could not schedule downtime: " + response);
+            LOG.debug("Could not schedule downtime: " + response);
         }
     }
 

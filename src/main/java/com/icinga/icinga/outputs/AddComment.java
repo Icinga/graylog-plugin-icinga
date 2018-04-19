@@ -45,17 +45,22 @@ public class AddComment extends IcingaOutput {
         HttpResponse response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
 
         if (response.getStatusLine().getStatusCode() == 404 && configuration.getBoolean(CK_CREATE_OBJECT)) {
+            LOG.debug("Icinga object "
+                    + configuration.getString(CK_ICINGA_HOST_NAME)
+                    + (configuration.stringIsSet(CK_ICINGA_SERVICE_NAME) ? "!" + configuration.getString(CK_ICINGA_SERVICE_NAME) : "")
+                    + " could not be found. Trying to create it."
+            );
             response = createIcingaObject(message);
             if (response.getStatusLine().getStatusCode() == 200) {
                 response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
             } else {
-                LOG.error("Could not create Icinga object while adding a comment: " + response.toString());
+                LOG.debug("Could not create Icinga object while adding a comment: " + response.toString());
                 return;
             }
         }
 
         if (response.getStatusLine().getStatusCode() != 200) {
-            LOG.error("Could not add comment: " + response.toString());
+            LOG.debug("Could not add comment: " + response.toString());
         }
     }
 

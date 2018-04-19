@@ -137,9 +137,6 @@ public abstract class IcingaOutput implements MessageOutput {
         String authorization = configuration.getString(CK_ICINGA_USER) + ":" + configuration.getString(CK_ICINGA_PASSWD);
         String authorizationBase64 = Base64.getEncoder().encodeToString(authorization.getBytes());
 
-        headers.put("Authorization", "Basic " + authorizationBase64);
-        headers.put("Accept", "application/json");
-
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         if (sslContext != null) {
             clientBuilder.setSSLContext(sslContext);
@@ -152,29 +149,40 @@ public abstract class IcingaOutput implements MessageOutput {
         HttpResponse response = null;
         Exception lastException = null;
 
+        headers.put("Authorization", "Basic " + authorizationBase64);
+        headers.put("Accept", "application/json");
+
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            method.addHeader(header.getKey(), header.getValue());
+        }
+
+        if (method instanceof HttpEntityEnclosingRequestBase) {
+            HttpEntity entity = new ByteArrayEntity(body.getBytes("UTF-8"));
+            ((HttpEntityEnclosingRequestBase) method).setEntity(entity);
+        }
+
         for (String endpoint : configuration.getList(CK_ICINGA_ENDPOINTS)) {
             try {
                 URI url = new URI("https://" + endpoint + relativeURL);
 
+                LOG.debug("Sending request to \"" + "https://" + endpoint + relativeURL + "\"");
+                if (method instanceof HttpEntityEnclosingRequestBase) {
+                    LOG.debug("With request body: " + ((HttpEntityEnclosingRequestBase) method).getEntity().toString());
+                }
+
                 method.setURI(url);
 
-                for (Map.Entry<String, String> header : headers.entrySet()) {
-                    method.addHeader(header.getKey(), header.getValue());
-                }
-
-                if (method instanceof HttpEntityEnclosingRequestBase) {
-                    HttpEntity entity = new ByteArrayEntity(body.getBytes("UTF-8"));
-                    ((HttpEntityEnclosingRequestBase) method).setEntity(entity);
-                }
-
                 response = client.execute(method);
+                String result = EntityUtils.toString(response.getEntity());
+                LOG.debug("Response from \"" + "https://" + endpoint + relativeURL + "\": " + response.toString());
+                LOG.debug("With response body " + result);
 
                 if (response.getStatusLine().getStatusCode() != 500) {
                     break;
                 }
             } catch (Exception e) {
                 lastException = e;
-                LOG.error(lastException.getClass().toString() + ": Could not connect to Icinga API (" + "https://" + endpoint + relativeURL + "): " + e.getMessage());
+                LOG.debug(lastException.getClass().toString() + ": Could not connect to Icinga API (" + "https://" + endpoint + relativeURL + "): " + e.getMessage());
             }
         }
 

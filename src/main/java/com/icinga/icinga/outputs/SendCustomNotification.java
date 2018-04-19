@@ -50,17 +50,22 @@ public class SendCustomNotification extends IcingaOutput {
         HttpResponse response = sendRequest(new HttpPost(), "actions/send-custom-notification", params, Collections.emptyMap(), "");
 
         if (response.getStatusLine().getStatusCode() == 404 && configuration.getBoolean(CK_CREATE_OBJECT)) {
+            LOG.debug("Icinga object "
+                    + configuration.getString(CK_ICINGA_HOST_NAME)
+                    + (configuration.stringIsSet(CK_ICINGA_SERVICE_NAME) ? "!" + configuration.getString(CK_ICINGA_SERVICE_NAME) : "")
+                    + " could not be found. Trying to create it."
+            );
             response = createIcingaObject(message);
             if (response.getStatusLine().getStatusCode() == 200) {
                 response = sendRequest(new HttpPost(), "actions/send-custom-notification", params, Collections.emptyMap(), "");
             } else {
-                LOG.error("Could not create Icinga object while sending custom notification: " + response.toString());
+                LOG.debug("Could not create Icinga object while sending custom notification: " + response.toString());
                 return;
             }
         }
 
         if (response.getStatusLine().getStatusCode() != 200) {
-            LOG.error("Could not send custom notification: " + response.toString());
+            LOG.debug("Could not send custom notification: " + response.toString());
         }
     }
 
