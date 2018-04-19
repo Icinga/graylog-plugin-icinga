@@ -150,6 +150,7 @@ public abstract class IcingaOutput implements MessageOutput {
 
         HttpClient client = clientBuilder.build();
         HttpResponse response = null;
+        Exception lastException = null;
 
         for (String endpoint : configuration.getList(CK_ICINGA_ENDPOINTS)) {
             try {
@@ -167,18 +168,19 @@ public abstract class IcingaOutput implements MessageOutput {
                 }
 
                 response = client.execute(method);
-                String result = EntityUtils.toString(response.getEntity());
-
-                LOG.info(result);
 
                 if (response.getStatusLine().getStatusCode() != 500) {
                     break;
                 }
             } catch (Exception e) {
-                StringWriter stringWriter = new StringWriter();
-                e.printStackTrace(new PrintWriter(stringWriter));
-                LOG.error(stringWriter.toString());
+                lastException = e;
+                LOG.error(lastException.getClass().toString() + ": Could not connect to Icinga API (" + "https://" + endpoint + relativeURL + "): " + e.getMessage());
             }
+        }
+
+        if (response == null) {
+            LOG.error("Could not send requests to specified Icinga APIs:");
+            throw lastException;
         }
 
         return response;
