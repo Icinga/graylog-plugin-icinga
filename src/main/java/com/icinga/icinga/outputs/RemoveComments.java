@@ -47,7 +47,10 @@ public class RemoveComments extends IcingaOutput {
         params.put("filter", filter.toString());
 
         HttpResponse response = sendRequest(new HttpPost(), "actions/remove-comment", params, Collections.emptyMap(), "");
-        //TODO add error handling
+
+        if (response.getStatusLine().getStatusCode() != 200) {
+            LOG.debug("Could not remove comment: " + response);
+        }
     }
 
     public interface Factory extends MessageOutput.Factory<RemoveComments> {

@@ -47,6 +47,10 @@ public class RemoveDowntimes extends IcingaOutput {
         params.put("filter", filter.toString());
 
         HttpResponse response = sendRequest(new HttpPost(), "actions/remove-downtime", params, Collections.emptyMap(), "");
+
+        if (response.getStatusLine().getStatusCode() != 200) {
+            LOG.debug("Could not remove downtime: " + response);
+        }
     }
 
     public interface Factory extends MessageOutput.Factory<RemoveDowntimes> {
