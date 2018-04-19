@@ -30,8 +30,6 @@ public class RemoveComments extends IcingaOutput {
 
     @Override
     public void write(Message message) throws Exception {
-        LOG.info(message.toString());
-
         StringBuilder filter = new StringBuilder();
         filter.append("comment.author == ");
         filter.append(Icinga2Filter.quoteString(resolveConfigField(CK_COMMENT_AUTHOR, message)));
@@ -50,6 +48,7 @@ public class RemoveComments extends IcingaOutput {
         params.put("filter", filter.toString());
 
         HttpResponse response = sendRequest(new HttpPost(), "actions/remove-comment", params, Collections.emptyMap(), "");
+        //TODO add error handling
     }
 
     public interface Factory extends MessageOutput.Factory<RemoveComments> {

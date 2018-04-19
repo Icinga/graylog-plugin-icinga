@@ -25,13 +25,10 @@ public class AddComment extends IcingaOutput {
     @Inject
     public AddComment(@Assisted Configuration configuration) throws MessageOutputConfigurationException {
         super(configuration);
-
     }
 
     @Override
     public void write(Message message) throws Exception {
-        LOG.info(message.toString());
-
         Map<String, String> params = new TreeMap<>();
 
         if (configuration.stringIsSet(CK_ICINGA_SERVICE_NAME)) {
