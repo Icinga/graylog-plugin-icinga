@@ -276,6 +276,22 @@ public abstract class IcingaOutput implements MessageOutput {
             ));
 
             configurationRequest.addField(new BooleanField(
+                    CK_VERIFY_SSL, "Verify SSL", true,
+                    "Verify the SSL certificates"
+            ));
+
+            configurationRequest.addField(new TextField(
+                    CK_SSL_CA_PEM, "SSL CA", "",
+                    "SSL CA Certificate (PEM)",
+                    ConfigurationField.Optional.OPTIONAL,
+                    TextField.Attribute.TEXTAREA
+            ));
+
+            return configurationRequest;
+        }
+
+        protected void addObjectCreationOptions(ConfigurationRequest configurationRequest) {
+            configurationRequest.addField(new BooleanField(
                     CK_CREATE_OBJECT, "Create object", false,
                     "Create Icinga object if missing (Service if given, host otherwise)"
             ));
@@ -295,20 +311,6 @@ public abstract class IcingaOutput implements MessageOutput {
                     ConfigurationField.Optional.OPTIONAL,
                     ListField.Attribute.ALLOW_CREATE
             ));
-
-            configurationRequest.addField(new BooleanField(
-                    CK_VERIFY_SSL, "Verify SSL", true,
-                    "Verify the SSL certificates"
-            ));
-
-            configurationRequest.addField(new TextField(
-                    CK_SSL_CA_PEM, "SSL CA", "",
-                    "SSL CA Certificate (PEM)",
-                    ConfigurationField.Optional.OPTIONAL,
-                    TextField.Attribute.TEXTAREA
-            ));
-
-            return configurationRequest;
         }
     }
 }

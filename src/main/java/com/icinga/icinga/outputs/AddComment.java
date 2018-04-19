@@ -85,6 +85,7 @@ public class AddComment extends IcingaOutput {
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
+            addObjectCreationOptions(baseRequest);
 
             return baseRequest;
         }
