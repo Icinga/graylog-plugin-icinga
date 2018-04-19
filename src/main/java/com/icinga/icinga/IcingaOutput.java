@@ -76,6 +76,17 @@ public abstract class IcingaOutput implements MessageOutput {
         return (new StrSubstitutor(message.getFields())).replace(configuration.getString(configField));
     }
 
+    protected List<String> resolveConfigList(String configField, Message message) {
+        List<String> result = new LinkedList<>();
+        StrSubstitutor substitutor = new StrSubstitutor(message.getFields());
+
+        for (String item : configuration.getList(configField)) {
+            result.add(substitutor.replace(item));
+        }
+
+        return result;
+    }
+
     protected HttpResponse sendRequest(HttpRequestBase method, String relativeURL, Map<String, String> params, Map<String, String> headers, String body) throws Exception {
         List<StringBuilder> paramStrings = new LinkedList<>();
         for (Map.Entry<String, String> param : params.entrySet()) {
