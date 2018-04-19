@@ -25,7 +25,6 @@ public class RemoveDowntimes extends IcingaOutput {
     @Inject
     public RemoveDowntimes(@Assisted Configuration configuration) throws MessageOutputConfigurationException {
         super(configuration);
-
     }
 
     @Override

@@ -25,7 +25,6 @@ public class RemoveComments extends IcingaOutput {
     @Inject
     public RemoveComments(@Assisted Configuration configuration) throws MessageOutputConfigurationException {
         super(configuration);
-
     }
 
     @Override

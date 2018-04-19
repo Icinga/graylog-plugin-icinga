@@ -32,7 +32,6 @@ public class ScheduleDowntime extends IcingaOutput {
     @Inject
     public ScheduleDowntime(@Assisted Configuration configuration) throws MessageOutputConfigurationException {
         super(configuration);
-
     }
 
     @Override

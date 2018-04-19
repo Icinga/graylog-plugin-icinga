@@ -29,7 +29,6 @@ public class ProcessCheckResult extends IcingaOutput {
     @Inject
     public ProcessCheckResult(@Assisted Configuration configuration) throws MessageOutputConfigurationException {
         super(configuration);
-
     }
 
     @Override
