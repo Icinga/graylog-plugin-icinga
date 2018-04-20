@@ -43,7 +43,7 @@ public class ProcessCheckResult extends IcingaOutput {
             params.put("host", resolveConfigField(CK_ICINGA_HOST_NAME, message));
         }
 
-        params.put("exit_status", resolveConfigField(CK_EXIT_CODE, message));
+        params.put("exit_status", configuration.getString(CK_EXIT_CODE));
         params.put("plugin_output", resolveConfigField(CK_OUTPUT, message));
 
         JsonObjectBuilder jsonData = Json.createObjectBuilder();
