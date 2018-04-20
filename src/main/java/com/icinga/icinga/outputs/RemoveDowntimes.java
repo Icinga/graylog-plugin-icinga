@@ -1,7 +1,6 @@
 package com.icinga.icinga.outputs;
 
 import com.google.inject.assistedinject.Assisted;
-import com.icinga.icinga.Icinga2Filter;
 import com.icinga.icinga.IcingaOutput;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -15,6 +14,8 @@ import org.graylog2.plugin.outputs.MessageOutputConfigurationException;
 import org.graylog2.plugin.streams.Stream;
 
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 import java.util.*;
 
 public class RemoveDowntimes extends IcingaOutput {
@@ -28,23 +29,27 @@ public class RemoveDowntimes extends IcingaOutput {
     @Override
     public void write(Message message) throws Exception {
         StringBuilder filter = new StringBuilder();
-        filter.append("downtime.author == ");
-        filter.append(Icinga2Filter.quoteString(resolveConfigField(CK_DOWNTIME_AUTHOR, message)));
-        filter.append(" && host.name == ");
-        filter.append(Icinga2Filter.quoteString(resolveConfigField(CK_ICINGA_HOST_NAME, message)));
+        JsonObjectBuilder filterVars = Json.createObjectBuilder();
+
+        filter.append("downtime.author == fv_da && host.name == fv_hn");
+        filterVars.add("fv_da", resolveConfigField(CK_DOWNTIME_AUTHOR, message));
+        filterVars.add("fv_hn", resolveConfigField(CK_ICINGA_HOST_NAME, message));
 
         if (configuration.stringIsSet(CK_ICINGA_SERVICE_NAME)) {
-            filter.append(" && service.name == ");
-            filter.append(Icinga2Filter.quoteString(resolveConfigField(CK_ICINGA_SERVICE_NAME, message)));
+            filter.append(" && service.name == fv_sn");
+            filterVars.add("fv_sn", resolveConfigField(CK_ICINGA_SERVICE_NAME, message));
         } else {
             filter.append(" && !service");
         }
 
+        JsonObjectBuilder jsonBody = Json.createObjectBuilder();
+        jsonBody.add("filter", filter.toString());
+        jsonBody.add("filter_vars", filterVars);
+
         Map<String, String> params = new TreeMap<>();
         params.put("type", "Downtime");
-        params.put("filter", filter.toString());
 
-        HttpResponse response = sendRequest(new HttpPost(), "actions/remove-downtime", params, Collections.emptyMap(), "");
+        HttpResponse response = sendRequest(new HttpPost(), "actions/remove-downtime", params, Collections.emptyMap(), jsonBody.build().toString());
 
         if (response.getStatusLine().getStatusCode() != 200) {
             LOG.error("Could not remove downtime: " + response);
