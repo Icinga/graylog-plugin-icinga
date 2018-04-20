@@ -165,9 +165,7 @@ public abstract class IcingaOutput implements MessageOutput {
                 URI url = new URI("https://" + endpoint + relativeURL);
 
                 LOG.debug("Sending request to \"" + "https://" + endpoint + relativeURL + "\"");
-                if (method instanceof HttpEntityEnclosingRequestBase) {
-                    LOG.debug("With request body: " + ((HttpEntityEnclosingRequestBase) method).getEntity().toString());
-                }
+                LOG.debug("With request body: " + body);
 
                 method.setURI(url);
 
