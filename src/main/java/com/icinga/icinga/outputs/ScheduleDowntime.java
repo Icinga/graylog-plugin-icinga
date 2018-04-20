@@ -18,9 +18,7 @@ import org.joda.time.DateTime;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class ScheduleDowntime extends IcingaOutput {
     private static final String CK_DOWNTIME_AUTHOR = "downtime_author";
@@ -78,7 +76,7 @@ public class ScheduleDowntime extends IcingaOutput {
         }
 
         if (response.getStatusLine().getStatusCode() != 200) {
-            LOG.debug("Could not schedule downtime: " + response);
+            LOG.error("Could not schedule downtime: " + response);
         }
     }
 
@@ -96,41 +94,41 @@ public class ScheduleDowntime extends IcingaOutput {
     public static class Config extends IcingaOutput.Config {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
-            ConfigurationRequest baseRequest = super.getRequestedConfiguration();
+            ArrayList<ConfigurationField> configurationFields = getDefaultConfigFields(true);
 
-            baseRequest.addField(new TextField(
+            configurationFields.add(new TextField(
                     CK_DOWNTIME_AUTHOR, "Downtime Author", "graylog",
                     "Author of the downtime",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
-            baseRequest.addField(new TextField(
+            configurationFields.add(new TextField(
                     CK_DOWNTIME_COMMENT, "Downtime Comment", "",
                     "Comment of the downtime",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
-            baseRequest.addField(new NumberField(
+            configurationFields.add(new NumberField(
                     CK_DOWNTIME_DURATION, "Downtime Duration", 0,
                     "Duration of the downtime in seconds",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
-            baseRequest.addField(new TextField(
+            configurationFields.add(new TextField(
                     CK_DOWNTIME_TRIGGER_NAME, "Downtime Trigger Name", "",
                     "Trigger of the downtime",
                     ConfigurationField.Optional.OPTIONAL
             ));
 
-            baseRequest.addField(new NumberField(
+            configurationFields.add(new NumberField(
                     CK_DOWNTIME_CHILD_OPTIONS, "Downtime Child Options", 0,
                     "Child options of the downtime",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
-            addObjectCreationOptions(baseRequest);
-
-            return baseRequest;
+            final ConfigurationRequest configurationRequest = new ConfigurationRequest();
+            configurationRequest.addFields(configurationFields);
+            return configurationRequest;
         }
     }
 

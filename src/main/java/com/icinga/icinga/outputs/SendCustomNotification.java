@@ -2,7 +2,6 @@ package com.icinga.icinga.outputs;
 
 import com.google.inject.assistedinject.Assisted;
 import com.icinga.icinga.IcingaOutput;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.graylog2.plugin.Message;
@@ -16,9 +15,7 @@ import org.graylog2.plugin.outputs.MessageOutputConfigurationException;
 import org.graylog2.plugin.streams.Stream;
 
 import javax.inject.Inject;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class SendCustomNotification extends IcingaOutput {
     private static final String CK_NOTIFICATION = "notification";
@@ -65,7 +62,7 @@ public class SendCustomNotification extends IcingaOutput {
         }
 
         if (response.getStatusLine().getStatusCode() != 200) {
-            LOG.debug("Could not send custom notification: " + response.toString());
+            LOG.error("Could not send custom notification: " + response.toString());
         }
     }
 
@@ -83,28 +80,28 @@ public class SendCustomNotification extends IcingaOutput {
     public static class Config extends IcingaOutput.Config {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
-            ConfigurationRequest baseRequest = super.getRequestedConfiguration();
+            ArrayList<ConfigurationField> configurationFields = getDefaultConfigFields(true);
 
-            baseRequest.addField(new TextField(
+            configurationFields.add(new TextField(
                     CK_NOTIFICATION, "Notification Comment", "",
                     "Notification text",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
-            baseRequest.addField(new TextField(
+            configurationFields.add(new TextField(
                     CK_NOTIFICATION_AUTHOR, "Notification Author", "graylog",
                     "The author of the notification",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
-            baseRequest.addField(new BooleanField(
+            configurationFields.add(new BooleanField(
                     CK_NOTIFICATION_FORCE, "Notification Force", true,
                     "Is this a forced notification?"
             ));
 
-            addObjectCreationOptions(baseRequest);
-
-            return baseRequest;
+            final ConfigurationRequest configurationRequest = new ConfigurationRequest();
+            configurationRequest.addFields(configurationFields);
+            return configurationRequest;
         }
     }
 

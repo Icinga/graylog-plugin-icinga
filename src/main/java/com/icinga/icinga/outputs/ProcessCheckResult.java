@@ -72,7 +72,7 @@ public class ProcessCheckResult extends IcingaOutput {
         }
 
         if (response.getStatusLine().getStatusCode() != 200) {
-            LOG.debug("Could not process check result: " + response.toString());
+            LOG.error("Could not process check result: " + response.toString());
         }
     }
 
@@ -90,7 +90,7 @@ public class ProcessCheckResult extends IcingaOutput {
     public static class Config extends IcingaOutput.Config {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
-            ConfigurationRequest baseRequest = super.getRequestedConfiguration();
+            ArrayList<ConfigurationField> configurationFields = getDefaultConfigFields(true);
 
             Map<String, String> exitCodes = new TreeMap<>();
             exitCodes.put("0", "0");
@@ -98,30 +98,30 @@ public class ProcessCheckResult extends IcingaOutput {
             exitCodes.put("2", "2");
             exitCodes.put("3", "3");
 
-            baseRequest.addField(new DropdownField(
+            configurationFields.add(new DropdownField(
                     CK_EXIT_CODE, "Plugin Exit Code", "",
                     exitCodes,
                     "Exit code of this check",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
-            baseRequest.addField(new TextField(
+            configurationFields.add(new TextField(
                     CK_OUTPUT, "Plugin Output", "",
                     "Output of this check result",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
-            baseRequest.addField(new ListField(
+            configurationFields.add(new ListField(
                     CK_PERF_DATA, "Plugin Performance Data",
                     Collections.emptyList(), Collections.emptyMap(),
                     "Performance data for this check result \"KEY=VALUE\"",
-                    ConfigurationField.Optional.NOT_OPTIONAL,
+                    ConfigurationField.Optional.OPTIONAL,
                     ListField.Attribute.ALLOW_CREATE
             ));
 
-            addObjectCreationOptions(baseRequest);
-
-            return baseRequest;
+            final ConfigurationRequest configurationRequest = new ConfigurationRequest();
+            configurationRequest.addFields(configurationFields);
+            return configurationRequest;
         }
     }
 

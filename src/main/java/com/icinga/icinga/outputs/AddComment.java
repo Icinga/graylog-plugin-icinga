@@ -14,9 +14,7 @@ import org.graylog2.plugin.outputs.MessageOutputConfigurationException;
 import org.graylog2.plugin.streams.Stream;
 
 import javax.inject.Inject;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class AddComment extends IcingaOutput {
     private static final String CK_COMMENT_AUTHOR = "comment_author";
@@ -60,7 +58,7 @@ public class AddComment extends IcingaOutput {
         }
 
         if (response.getStatusLine().getStatusCode() != 200) {
-            LOG.debug("Could not add comment: " + response.toString());
+            LOG.error("Could not add comment: " + response.toString());
         }
     }
 
@@ -78,23 +76,24 @@ public class AddComment extends IcingaOutput {
     public static class Config extends IcingaOutput.Config {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
-            ConfigurationRequest baseRequest = super.getRequestedConfiguration();
+            ArrayList<ConfigurationField> configurationFields = getDefaultConfigFields(true);
 
-            baseRequest.addField(new TextField(
+            configurationFields.add(new TextField(
                     CK_COMMENT_AUTHOR, "Comment Author", "graylog",
                     "Author of the comment",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
-            baseRequest.addField(new TextField(
+            configurationFields.add(new TextField(
                     CK_COMMENT, "Comment", "",
                     "The comment itself",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
-            addObjectCreationOptions(baseRequest);
 
-            return baseRequest;
+            final ConfigurationRequest configurationRequest = new ConfigurationRequest();
+            configurationRequest.addFields(configurationFields);
+            return configurationRequest;
         }
     }
 

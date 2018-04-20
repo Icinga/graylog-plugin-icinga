@@ -15,9 +15,7 @@ import org.graylog2.plugin.outputs.MessageOutputConfigurationException;
 import org.graylog2.plugin.streams.Stream;
 
 import javax.inject.Inject;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class RemoveDowntimes extends IcingaOutput {
     private static final String CK_DOWNTIME_AUTHOR = "downtime_author";
@@ -49,7 +47,7 @@ public class RemoveDowntimes extends IcingaOutput {
         HttpResponse response = sendRequest(new HttpPost(), "actions/remove-downtime", params, Collections.emptyMap(), "");
 
         if (response.getStatusLine().getStatusCode() != 200) {
-            LOG.debug("Could not remove downtime: " + response);
+            LOG.error("Could not remove downtime: " + response);
         }
     }
 
@@ -67,15 +65,17 @@ public class RemoveDowntimes extends IcingaOutput {
     public static class Config extends IcingaOutput.Config {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
-            ConfigurationRequest baseRequest = super.getRequestedConfiguration();
+            ArrayList<ConfigurationField> configurationFields = getDefaultConfigFields(false);
 
-            baseRequest.addField(new TextField(
+            configurationFields.add(new TextField(
                     CK_DOWNTIME_AUTHOR, "Downtimes Author", "graylog",
                     "Author of the downtimes",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
-            return baseRequest;
+            final ConfigurationRequest configurationRequest = new ConfigurationRequest();
+            configurationRequest.addFields(configurationFields);
+            return configurationRequest;
         }
     }
 

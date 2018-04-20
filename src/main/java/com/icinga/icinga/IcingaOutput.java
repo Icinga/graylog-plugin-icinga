@@ -49,7 +49,6 @@ public abstract class IcingaOutput implements MessageOutput {
     protected static final String CK_VERIFY_SSL = "verify_ssl";
     protected static final String CK_SSL_CA_PEM = "ssl_ca_pem";
 
-
     protected static final Logger LOG = LoggerFactory.getLogger(IcingaOutput.class);
     protected final AtomicBoolean isRunning = new AtomicBoolean(false);
     protected Configuration configuration;
@@ -257,66 +256,61 @@ public abstract class IcingaOutput implements MessageOutput {
         isRunning.set(false);
     }
 
-    public static class Config extends MessageOutput.Config {
-        @Override
-        public ConfigurationRequest getRequestedConfiguration() {
-            final ConfigurationRequest configurationRequest = new ConfigurationRequest();
+    protected static ArrayList<ConfigurationField> getDefaultConfigFields(boolean withObjectCreationOptions) {
+        ArrayList<ConfigurationField> configurationFields = new ArrayList<>();
 
-            configurationRequest.addField(new ListField(
-                    CK_ICINGA_ENDPOINTS, "Icinga Endpoints",
-                    Collections.emptyList(), Collections.emptyMap(),
-                    "Endpoints of your Icinga 2 instances in format \"HOST:PORT\"",
-                    ConfigurationField.Optional.NOT_OPTIONAL,
-                    ListField.Attribute.ALLOW_CREATE
-            ));
+        configurationFields.add(new ListField(
+                CK_ICINGA_ENDPOINTS, "Icinga Endpoints",
+                Collections.emptyList(), Collections.emptyMap(),
+                "Endpoints of your Icinga 2 instances in format \"HOST:PORT\"",
+                ConfigurationField.Optional.NOT_OPTIONAL,
+                ListField.Attribute.ALLOW_CREATE
+        ));
 
-            configurationRequest.addField(new TextField(
-                    CK_ICINGA_USER, "Icinga User", "",
-                    "User of your Icinga 2 API",
-                    ConfigurationField.Optional.NOT_OPTIONAL
-            ));
+        configurationFields.add(new TextField(
+                CK_ICINGA_USER, "Icinga User", "",
+                "User of your Icinga 2 API",
+                ConfigurationField.Optional.NOT_OPTIONAL
+        ));
 
-            configurationRequest.addField(new TextField(
-                    CK_ICINGA_PASSWD, "Icinga Password", "",
-                    "Password of your Icinga 2 API",
-                    ConfigurationField.Optional.NOT_OPTIONAL,
-                    TextField.Attribute.IS_PASSWORD
-            ));
+        configurationFields.add(new TextField(
+                CK_ICINGA_PASSWD, "Icinga Password", "",
+                "Password of your Icinga 2 API",
+                ConfigurationField.Optional.NOT_OPTIONAL,
+                TextField.Attribute.IS_PASSWORD
+        ));
 
-            configurationRequest.addField(new TextField(
-                    CK_ICINGA_HOST_NAME, "Icinga Host Name", "",
-                    "Icinga host to use for results",
-                    ConfigurationField.Optional.NOT_OPTIONAL
-            ));
+        configurationFields.add(new TextField(
+                CK_ICINGA_HOST_NAME, "Icinga Host Name", "",
+                "Icinga host to use for results",
+                ConfigurationField.Optional.NOT_OPTIONAL
+        ));
 
-            configurationRequest.addField(new TextField(
-                    CK_ICINGA_SERVICE_NAME, "Icinga Service Name", "",
-                    "Icinga service to use for results",
-                    ConfigurationField.Optional.OPTIONAL
-            ));
+        configurationFields.add(new TextField(
+                CK_ICINGA_SERVICE_NAME, "Icinga Service Name", "",
+                "Icinga service to use for results",
+                ConfigurationField.Optional.OPTIONAL
+        ));
 
-            configurationRequest.addField(new BooleanField(
-                    CK_VERIFY_SSL, "Verify SSL", true,
-                    "Verify the SSL certificates"
-            ));
+        configurationFields.add(new BooleanField(
+                CK_VERIFY_SSL, "Verify SSL", true,
+                "Verify the SSL certificates"
+        ));
 
-            configurationRequest.addField(new TextField(
-                    CK_SSL_CA_PEM, "SSL CA", "",
-                    "SSL CA Certificate (PEM)",
-                    ConfigurationField.Optional.OPTIONAL,
-                    TextField.Attribute.TEXTAREA
-            ));
+        configurationFields.add(new TextField(
+                CK_SSL_CA_PEM, "SSL CA", "",
+                "SSL CA Certificate (PEM)",
+                ConfigurationField.Optional.OPTIONAL,
+                TextField.Attribute.TEXTAREA
+        ));
 
-            return configurationRequest;
-        }
-
-        protected void addObjectCreationOptions(ConfigurationRequest configurationRequest) {
-            configurationRequest.addField(new BooleanField(
+        if (withObjectCreationOptions) {
+            configurationFields.add(new BooleanField(
                     CK_CREATE_OBJECT, "Create object", false,
                     "Create Icinga object if missing (Service if given, host otherwise)"
             ));
 
-            configurationRequest.addField(new ListField(
+            configurationFields.add(new ListField(
                     CK_OBJECT_TEMPLATES, "Object Templates",
                     Collections.emptyList(), Collections.emptyMap(),
                     "Templates to create the object from",
@@ -324,7 +318,7 @@ public abstract class IcingaOutput implements MessageOutput {
                     ListField.Attribute.ALLOW_CREATE
             ));
 
-            configurationRequest.addField(new ListField(
+            configurationFields.add(new ListField(
                     CK_OBJECT_ATTRIBUTES, "Object Attributes",
                     Collections.emptyList(), Collections.emptyMap(),
                     "Attributes to set while creating an object (Format: ATTR=VALUE)",
@@ -332,5 +326,7 @@ public abstract class IcingaOutput implements MessageOutput {
                     ListField.Attribute.ALLOW_CREATE
             ));
         }
+
+        return configurationFields;
     }
 }
