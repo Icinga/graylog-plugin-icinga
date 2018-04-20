@@ -86,7 +86,7 @@ public class SendCustomNotification extends IcingaOutput {
             ConfigurationRequest baseRequest = super.getRequestedConfiguration();
 
             baseRequest.addField(new TextField(
-                    CK_NOTIFICATION, "Notification", "",
+                    CK_NOTIFICATION, "Notification Comment", "",
                     "Notification text",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
