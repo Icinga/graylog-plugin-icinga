@@ -70,7 +70,7 @@ public class ScheduleDowntime extends IcingaOutput {
             if (response.getStatusLine().getStatusCode() == 200) {
                 response = sendRequest(new HttpPost(), "actions/schedule-downtime", params, Collections.emptyMap(), body);
             } else {
-                LOG.debug("Could not create Icinga object while scheduling a downtime: " + response);
+                LOG.error("Could not create Icinga object while scheduling a downtime: " + response);
                 return;
             }
         }

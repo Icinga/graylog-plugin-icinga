@@ -56,7 +56,7 @@ public class SendCustomNotification extends IcingaOutput {
             if (response.getStatusLine().getStatusCode() == 200) {
                 response = sendRequest(new HttpPost(), "actions/send-custom-notification", params, Collections.emptyMap(), "");
             } else {
-                LOG.debug("Could not create Icinga object while sending custom notification: " + response.toString());
+                LOG.error("Could not create Icinga object while sending custom notification: " + response.toString());
                 return;
             }
         }

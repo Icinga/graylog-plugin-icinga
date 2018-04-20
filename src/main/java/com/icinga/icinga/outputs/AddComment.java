@@ -52,7 +52,7 @@ public class AddComment extends IcingaOutput {
             if (response.getStatusLine().getStatusCode() == 200) {
                 response = sendRequest(new HttpPost(), "actions/add-comment", params, Collections.emptyMap(), "");
             } else {
-                LOG.debug("Could not create Icinga object while adding a comment: " + response.toString());
+                LOG.error("Could not create Icinga object while adding a comment: " + response.toString());
                 return;
             }
         }
