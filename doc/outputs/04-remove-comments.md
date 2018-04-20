@@ -1,6 +1,6 @@
 # Remove Comments
 
-Remove comments from the target host/service. In addition to the
+Removes comments from the target host/service. In addition to the
 [common config options](07-common-config-options.md) *Comments Author* specify
 the author to remove comments of (may contain `${message_field_name}`).
 

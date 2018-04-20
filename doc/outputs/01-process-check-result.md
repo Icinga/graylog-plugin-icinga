@@ -9,4 +9,5 @@ ones:
 * Plugin Performance Data (format: `KEY=VALUE`)
 
 For their meaning see the [Icinga 2 API documentation](https://www.icinga.com/docs/icinga2/latest/doc/12-icinga2-api/#process-check-result).
-Plugin Output and Plugin Performance Data may contain `${message_field_name}`.
+*Plugin Output* and *Plugin Performance Data* may contain
+`${message_field_name}`.
