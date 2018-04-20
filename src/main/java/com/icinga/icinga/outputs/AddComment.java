@@ -80,13 +80,13 @@ public class AddComment extends IcingaOutput {
 
             configurationFields.add(new TextField(
                     CK_COMMENT_AUTHOR, "Comment Author", "graylog",
-                    "Author of the comment",
+                    "Author of the comment (may contain field macros)",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
             configurationFields.add(new TextField(
                     CK_COMMENT, "Comment", "",
-                    "The comment itself",
+                    "The comment itself (may contain field macros)",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 

@@ -69,7 +69,7 @@ public class RemoveComments extends IcingaOutput {
 
             configurationFields.add(new TextField(
                     CK_COMMENT_AUTHOR, "Comments Author", "graylog",
-                    "Author of the comments",
+                    "Author of the comments (may contain field macros)",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 

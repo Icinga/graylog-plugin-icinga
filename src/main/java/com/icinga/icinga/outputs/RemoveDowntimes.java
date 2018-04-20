@@ -69,7 +69,7 @@ public class RemoveDowntimes extends IcingaOutput {
 
             configurationFields.add(new TextField(
                     CK_DOWNTIME_AUTHOR, "Downtimes Author", "graylog",
-                    "Author of the downtimes",
+                    "Author of the downtimes (may contain field macros)",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 

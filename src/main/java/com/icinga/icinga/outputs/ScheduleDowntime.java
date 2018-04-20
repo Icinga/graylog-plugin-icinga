@@ -98,13 +98,13 @@ public class ScheduleDowntime extends IcingaOutput {
 
             configurationFields.add(new TextField(
                     CK_DOWNTIME_AUTHOR, "Downtime Author", "graylog",
-                    "Author of the downtime",
+                    "Author of the downtime (may contain field macros)",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
             configurationFields.add(new TextField(
                     CK_DOWNTIME_COMMENT, "Downtime Comment", "",
-                    "Comment of the downtime",
+                    "Comment of the downtime (may contain field macros)",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
@@ -116,7 +116,7 @@ public class ScheduleDowntime extends IcingaOutput {
 
             configurationFields.add(new TextField(
                     CK_DOWNTIME_TRIGGER_NAME, "Downtime Trigger Name", "",
-                    "Trigger of the downtime",
+                    "Trigger of the downtime (may contain field macros)",
                     ConfigurationField.Optional.OPTIONAL
             ));
 

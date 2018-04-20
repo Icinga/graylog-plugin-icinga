@@ -107,14 +107,14 @@ public class ProcessCheckResult extends IcingaOutput {
 
             configurationFields.add(new TextField(
                     CK_OUTPUT, "Plugin Output", "",
-                    "Output of this check result",
+                    "Output of this check result (may contain field macros)",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
             configurationFields.add(new ListField(
                     CK_PERF_DATA, "Plugin Performance Data",
                     Collections.emptyList(), Collections.emptyMap(),
-                    "Performance data for this check result \"KEY=VALUE\"",
+                    "Performance data for this check result \"KEY=VALUE\" (may contain field macros)",
                     ConfigurationField.Optional.OPTIONAL,
                     ListField.Attribute.ALLOW_CREATE
             ));

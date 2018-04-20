@@ -84,13 +84,13 @@ public class SendCustomNotification extends IcingaOutput {
 
             configurationFields.add(new TextField(
                     CK_NOTIFICATION, "Notification Comment", "",
-                    "Notification text",
+                    "Notification text (may contain field macros)",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
             configurationFields.add(new TextField(
                     CK_NOTIFICATION_AUTHOR, "Notification Author", "graylog",
-                    "The author of the notification",
+                    "The author of the notification (may contain field macros)",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 

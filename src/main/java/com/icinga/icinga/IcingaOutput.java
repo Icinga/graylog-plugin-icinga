@@ -280,13 +280,13 @@ public abstract class IcingaOutput implements MessageOutput {
 
         configurationFields.add(new TextField(
                 CK_ICINGA_HOST_NAME, "Icinga Host Name", "",
-                "Icinga host to use for results",
+                "Icinga host to use for results (may contain field macros)",
                 ConfigurationField.Optional.NOT_OPTIONAL
         ));
 
         configurationFields.add(new TextField(
                 CK_ICINGA_SERVICE_NAME, "Icinga Service Name", "",
-                "Icinga service to use for results",
+                "Icinga service to use for results (may contain field macros)",
                 ConfigurationField.Optional.OPTIONAL
         ));
 
@@ -311,7 +311,7 @@ public abstract class IcingaOutput implements MessageOutput {
             configurationFields.add(new ListField(
                     CK_OBJECT_TEMPLATES, "Object Templates",
                     Collections.emptyList(), Collections.emptyMap(),
-                    "Templates to create the object from",
+                    "Templates to create the object from (may contain field macros)",
                     ConfigurationField.Optional.OPTIONAL,
                     ListField.Attribute.ALLOW_CREATE
             ));
@@ -319,7 +319,7 @@ public abstract class IcingaOutput implements MessageOutput {
             configurationFields.add(new ListField(
                     CK_OBJECT_ATTRIBUTES, "Object Attributes",
                     Collections.emptyList(), Collections.emptyMap(),
-                    "Attributes to set while creating an object (Format: ATTR=VALUE)",
+                    "Attributes to set while creating an object (format: ATTR=VALUE, may contain field macros)",
                     ConfigurationField.Optional.OPTIONAL,
                     ListField.Attribute.ALLOW_CREATE
             ));
