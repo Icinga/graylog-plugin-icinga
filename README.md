@@ -30,12 +30,14 @@ Getting started
 
 After installation configure one or more of the outputs provided by this plugin:
 
-* [Process Check Result](doc/04-process-check-result.md)
-* [Send Custom Notification](doc/05-send-custom-notification.md)
-* [Add Comment](doc/06-add-comment.md)
-* [Remove Comments](doc/07-remove-comments.md)
-* [Schedule Downtime](doc/08-schedule-downtime.md)
-* [Remove Downtimes](doc/09-remove-downtimes.md)
+* Process Check Result
+* Send Custom Notification
+* Add Comment
+* Remove Comments
+* Schedule Downtime
+* Remove Downtimes
+
+For their configuration options read the [detailed manual](https://www.icinga.com/docs/graylog-plugin/latest).
 
 Plugin Release
 --------------
