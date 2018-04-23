@@ -4,12 +4,12 @@ This Graylog output plugin integrates [Icinga 2](https://www.icinga.com/products
 with [Graylog](https://www.graylog.org/) by executing an [Icinga 2 API](https://www.icinga.com/docs/icinga2/latest/doc/12-icinga2-api/)
 action for every processed message. Available actions:
 
-* [Process Check Result](outputs/01-process-check-result.md)
-* [Send Custom Notification](outputs/02-send-custom-notification.md)
-* [Add Comment](outputs/03-add-comment.md)
-* [Remove Comments](outputs/04-remove-comments.md)
-* [Schedule Downtime](outputs/05-schedule-downtime.md)
-* [Remove Downtimes](outputs/06-remove-downtimes.md)
+* [Process Check Result](04-process-check-result.md)
+* [Send Custom Notification](05-send-custom-notification.md)
+* [Add Comment](06-add-comment.md)
+* [Remove Comments](07-remove-comments.md)
+* [Schedule Downtime](08-schedule-downtime.md)
+* [Remove Downtimes](09-remove-downtimes.md)
 
 ## Example Use Cases
 
@@ -76,12 +76,12 @@ Restart `graylog-server` and you are done.
 
 After installation configure one or more of the outputs provided by this plugin:
 
-* [Process Check Result](outputs/01-process-check-result.md)
-* [Send Custom Notification](outputs/02-send-custom-notification.md)
-* [Add Comment](outputs/03-add-comment.md)
-* [Remove Comments](outputs/04-remove-comments.md)
-* [Schedule Downtime](outputs/05-schedule-downtime.md)
-* [Remove Downtimes](outputs/06-remove-downtimes.md)
+* [Process Check Result](04-process-check-result.md)
+* [Send Custom Notification](05-send-custom-notification.md)
+* [Add Comment](06-add-comment.md)
+* [Remove Comments](07-remove-comments.md)
+* [Schedule Downtime](08-schedule-downtime.md)
+* [Remove Downtimes](09-remove-downtimes.md)
 
 ## Development
 

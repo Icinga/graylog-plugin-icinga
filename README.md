@@ -30,12 +30,12 @@ Getting started
 
 After installation configure one or more of the outputs provided by this plugin:
 
-* [Process Check Result](doc/outputs/01-process-check-result.md)
-* [Send Custom Notification](doc/outputs/02-send-custom-notification.md)
-* [Add Comment](doc/outputs/03-add-comment.md)
-* [Remove Comments](doc/outputs/04-remove-comments.md)
-* [Schedule Downtime](doc/outputs/05-schedule-downtime.md)
-* [Remove Downtimes](doc/outputs/06-remove-downtimes.md)
+* [Process Check Result](doc/04-process-check-result.md)
+* [Send Custom Notification](doc/05-send-custom-notification.md)
+* [Add Comment](doc/06-add-comment.md)
+* [Remove Comments](doc/07-remove-comments.md)
+* [Schedule Downtime](doc/08-schedule-downtime.md)
+* [Remove Downtimes](doc/09-remove-downtimes.md)
 
 Plugin Release
 --------------

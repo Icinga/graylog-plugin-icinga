@@ -1,7 +1,7 @@
 # Schedule Downtime
 
 Schedules a downtime for the target host/service. In addition to the
-[common config options](07-common-config-options.md) there are the following
+[common config options](02-common-config-options.md) there are the following
 ones:
 
 * Downtime Author
@@ -13,7 +13,7 @@ ones:
 For their meaning (except *Downtime Duration*) see the
 [Icinga 2 API documentation](https://www.icinga.com/docs/icinga2/latest/doc/12-icinga2-api/#schedule-downtime).
 *Downtime Author*, *Downtime Comment* and *Downtime Trigger Name* may contain
-[message field macros](../03-field-macros.md).
+[message field macros](03-field-macros.md).
 
 ## Limitations
 
