@@ -1,6 +1,6 @@
 # Icinga Plugin for Graylog
 
-An output plugin for integrating Icinga with Graylog.
+An output plugin for integrating [Icinga 2](https://www.icinga.com/products/icinga-2/) with Graylog.
 
 **Required Graylog version:** 2.0 and later
 
@@ -17,12 +17,6 @@ Restart `graylog-server` and you are done.
 Development
 -----------
 
-Usage
------
-
-Getting started
----------------
-
 This project is using Maven 3 and requires Java 8 or higher.
 
 * Clone this repository.
@@ -30,6 +24,20 @@ This project is using Maven 3 and requires Java 8 or higher.
 * Optional: Run `mvn jdeb:jdeb` and `mvn rpm:rpm` to create a DEB and RPM package respectively.
 * Copy generated JAR file in target directory to your Graylog plugin directory.
 * Restart Graylog.
+
+Getting started
+---------------
+
+After installation configure one or more of the outputs provided by this plugin:
+
+* Process Check Result
+* Send Custom Notification
+* Add Comment
+* Remove Comments
+* Schedule Downtime
+* Remove Downtimes
+
+For their configuration options read the [detailed manual](https://www.icinga.com/docs/graylog-plugin/latest).
 
 Plugin Release
 --------------
