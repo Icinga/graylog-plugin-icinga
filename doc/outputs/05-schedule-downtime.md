@@ -13,7 +13,7 @@ ones:
 For their meaning (except *Downtime Duration*) see the
 [Icinga 2 API documentation](https://www.icinga.com/docs/icinga2/latest/doc/12-icinga2-api/#schedule-downtime).
 *Downtime Author*, *Downtime Comment* and *Downtime Trigger Name* may contain
-`${message_field_name}`.
+[message field macros](../03-field-macros.md).
 
 ## Limitations
 

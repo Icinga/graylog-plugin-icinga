@@ -10,4 +10,4 @@ ones:
 
 For their meaning see the [Icinga 2 API documentation](https://www.icinga.com/docs/icinga2/latest/doc/12-icinga2-api/#send-custom-notification).
 *Notification Comment* and *Notification Author* may contain
-`${message_field_name}`.
+[message field macros](../03-field-macros.md).

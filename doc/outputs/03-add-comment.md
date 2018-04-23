@@ -8,4 +8,4 @@ ones:
 * Comment
 
 For their meaning see the [Icinga 2 API documentation](https://www.icinga.com/docs/icinga2/latest/doc/12-icinga2-api/#add-comment).
-Both may contain `${message_field_name}`.
+Both may contain [message field macros](../03-field-macros.md).

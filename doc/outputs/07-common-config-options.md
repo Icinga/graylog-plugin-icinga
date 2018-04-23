@@ -43,12 +43,12 @@ service of a host (if both are given) or a host (if no service is given).
 ### Icinga Host Name
 
 The target [host](https://www.icinga.com/docs/icinga2/latest/doc/09-object-types/#host)
-name. May contain `${message_field_name}`.
+name. May contain [message field macros](../03-field-macros.md).
 
 ### Icinga Service Name
 
 The target [service](https://www.icinga.com/docs/icinga2/latest/doc/09-object-types/#service)
-description. May contain `${message_field_name}`.
+description. May contain [message field macros](../03-field-macros.md).
 
 ## Auto-Creation of Hosts/Services
 
@@ -62,9 +62,9 @@ Enable auto-creation of hosts/services.
 ### Object Templates
 
 The [templates](https://www.icinga.com/docs/icinga2/latest/doc/17-language-reference/#template-imports)
-a newly created host/service shall import. May contain `${message_field_name}`.
+a newly created host/service shall import. May contain [message field macros](../03-field-macros.md).
 
 ### Object Attributes
 
 The attributes of a newly created host/service in the format `KEY=VALUE`. May
-contain `${message_field_name}`.
+contain [message field macros](../03-field-macros.md).
