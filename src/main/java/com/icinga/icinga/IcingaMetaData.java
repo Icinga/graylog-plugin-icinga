@@ -31,7 +31,7 @@ public class IcingaMetaData implements PluginMetaData {
 
     @Override
     public URI getURL() {
-        return URI.create("https://icinga.org");
+        return URI.create("https://icinga.com");
     }
 
     @Override
