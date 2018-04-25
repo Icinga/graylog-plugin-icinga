@@ -15,7 +15,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
-    secure: <enter your encrypted GitHub access token>
+    secure: jRbzx0Q6Lpner7A8Z+P9M5FZgJ7OWQCpeHlAAkAjNEShfVdJ5wlbh9558ZWBzoFhDRkC0Vvq+eoRGUmIn6ibWbhSQ0xlkt5WwK/36AYEQjsZ2f8Epz3RGiKxZMBKRI2yI5O82ffxmIuq1zAlXg5iD8tD0+SP/D/6ht2ifyVQiuFxJAmNGi+UYz5OwlAKN30s6pFKDZNohKrChf+U+bTXwjRVqgzsaZYUM4EzotX93hLnIwfLtyr+oDz+NjYqmI5TOpIzvRG+eP2fZwFDmi7K7CrDOfRVcwsenS5XMb8qsaay3iHkxJOOOk1coxgwfcC50WDd3ckQk80unhhhjYHnYv9DVXWK+RS0rMmFvRBgHGAbMOX63KFqNQ6FQmQbKD9AjpKnTsr9WJQYen6Q9WxunoyrDbHF8vkhISs0X+VARtHmIdbGT/cU9auIYVvRLgCCMVRsKVWEqe8N23Mmxn0Q6ZOtL/dcGICStDB8QEq1nftbmBtN4GBymThc5EiLeCjdlcNg2r8VlZ3RE2PDx7K9FUXQHoIic+WhwvDpvHuu7JaYqP8tDHnw6iDdVMhgddHMK4/rfNnTtwfhSmY0i43pMDPsY/qJb1FwRhzUxtC3JN8p6a8MTXkCJxxroo1ukIpqyMUmZLfGsM1wGWg3XKo1lOIGOKLRx7S68oSIubIyNNk=
   file:
     - "${RELEASE_PKG_FILE}"
     - "${RELEASE_DEB_FILE}"
@@ -24,3 +24,5 @@ deploy:
   on:
     tags: true
     jdk: oraclejdk8
+    repo: Icinga/graylog-plugin-icinga
+    branch: master
